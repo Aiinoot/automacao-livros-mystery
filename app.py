@@ -64,22 +64,29 @@ def scrape_mystery_books():
 
 # Interface do Botão
 if st.button('🚀 Iniciar Extração de Dados'):
-    with st.spinner('O robô está trabalhando...'):
-        dados = scrape_mystery_books()
-        df = pd.DataFrame(dados)
-        
-        st.success(f"Encontrados {len(df)} livros!")
-        st.dataframe(df) # Exibe a tabela no navegador
+    try:
+        with st.spinner('O robô está trabalhando nas páginas...'):
+            dados = scrape_mystery_books()
+            
+            if dados:
+                df = pd.DataFrame(dados)
+                st.success(f"✅ Sucesso! Encontrados {len(df)} livros.")
+                
+                # Mostra uma prévia dos dados
+                st.dataframe(df.head(10)) 
 
-        # Lógica para baixar o Excel
-        output = BytesIO()
-        with pd.ExcelWriter(output, engine='openpyxl') as writer:
-            df.to_excel(writer, index=False, sheet_name='MysteryBooks')
-        processed_data = output.getvalue()
-
-        st.download_button(
-            label="📥 Baixar Planilha Excel (.xlsx)",
-            data=processed_data,
-            file_name="mystery_books_GAM.xlsx",
-            mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-        )
+                # Gerar o Excel na memória
+                output = BytesIO()
+                with pd.ExcelWriter(output, engine='openpyxl') as writer:
+                    df.to_excel(writer, index=False, sheet_name='MysteryBooks')
+                
+                st.download_button(
+                    label="📥 Baixar Planilha Completa (Excel)",
+                    data=output.getvalue(),
+                    file_name="mystery_books_GAM.xlsx",
+                    mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+                )
+            else:
+                st.error("Nenhum dado foi encontrado. Verifique a conexão com o site alvo.")
+    except Exception as e:
+        st.error(f"Ocorreu um erro inesperado: {e}")
