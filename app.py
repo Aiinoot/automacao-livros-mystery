@@ -4,12 +4,10 @@ from bs4 import BeautifulSoup
 import pandas as pd
 from io import BytesIO
 
-# Configurações de UI
-st.set_page_config(page_title="Scraper Mystery Books", page_icon="📚")
-st.title("📚 Book Scraper - Categoria Mystery")
-st.markdown("Este robô extrai dados do site *Books to Scrape* para o processo seletivo GAM.")
+st.set_page_config(page_title="Scraper Mystery Books"   )
+st.title("Book Scraper - Categoria Mystery")
+st.markdown("Este robô extrai dados do site *Books to Scrape*.")
 
-# Constantes
 EXCHANGE_RATE = 7.00 
 
 def convert_rating(star_text):
@@ -20,7 +18,6 @@ def scrape_mystery_books():
     books_data = []
     page_url = "https://books.toscrape.com/catalogue/category/books/mystery_3/index.html"
     
-    # Barra de progresso visual
     progress_bar = st.progress(0)
     status_text = st.empty()
     
@@ -62,31 +59,33 @@ def scrape_mystery_books():
     status_text.text("Extração concluída!")
     return books_data
 
-# Interface do Botão
-if st.button('🚀 Iniciar Extração de Dados'):
+if st.button('Iniciar Extração de Dados'):
     try:
         with st.spinner('O robô está trabalhando nas páginas...'):
             dados = scrape_mystery_books()
             
             if dados:
                 df = pd.DataFrame(dados)
-                st.success(f"✅ Sucesso! Encontrados {len(df)} livros.")
-                
-                # Mostra uma prévia dos dados
+                st.success(f"Sucesso! Encontrados {len(df)} livros.")
                 st.dataframe(df.head(10)) 
 
-                # Gerar o Excel na memória
                 output = BytesIO()
                 with pd.ExcelWriter(output, engine='openpyxl') as writer:
                     df.to_excel(writer, index=False, sheet_name='MysteryBooks')
                 
                 st.download_button(
-                    label="📥 Baixar Planilha Completa (Excel)",
+                    label="Baixar Planilha Completa (Excel)",
                     data=output.getvalue(),
-                    file_name="mystery_books_GAM.xlsx",
+                    file_name="mystery_books.xlsx",
                     mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
                 )
             else:
                 st.error("Nenhum dado foi encontrado. Verifique a conexão com o site alvo.")
     except Exception as e:
         st.error(f"Ocorreu um erro inesperado: {e}")
+
+with st.expander("Clique aqui para visualizar o Código-Fonte (app.py)"):
+    st.markdown("Abaixo está a implementação completa utilizando **Python, BeautifulSoup e Streamlit**.")
+    with open(__file__, "r", encoding="utf-8") as f:
+        codigo_completo = f.read()
+    st.code(codigo_completo, language="python")
